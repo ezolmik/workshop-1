@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kecske–káposzta–farkas</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#163047;background:#f0f6f5}*{box-sizing:border-box}body{margin:0;padding:24px}main{max-width:980px;margin:auto}h1{text-align:center;margin:0 0 8px}p{text-align:center}.intro{color:#48616b;margin-bottom:22px}.board{display:grid;grid-template-columns:1fr 170px 1fr;gap:12px;align-items:stretch}.bank{background:#d8edcc;border:3px solid #7fa66b;border-radius:18px;min-height:320px;padding:15px;display:flex;flex-direction:column;gap:12px}.bank h2{text-align:center;font-size:1.1rem;margin:0}.items{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:center;flex:1}.item{border:2px solid #a7b7bd;background:white;border-radius:14px;padding:12px 9px;font-size:1rem;cursor:pointer;min-width:90px;box-shadow:0 3px 0 #c7d2d6;transition:.15s}.item:hover:not(:disabled){transform:translateY(-2px)}.item.selected{border-color:#087e82;background:#d8faf6;box-shadow:0 0 0 3px #7fdad4}.item:disabled{opacity:.55;cursor:not-allowed}.river{background:linear-gradient(125deg,#b7e9fa,#62b6d8);border-radius:18px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:12px;gap:12px}.boat{background:#fff8e8;border:3px solid #b17a37;border-radius:18px;padding:12px;text-align:center;width:100%;font-size:1.1rem}.boat .emoji{font-size:2.3rem;display:block}.cross{border:0;border-radius:12px;background:#075b68;color:white;padding:14px 12px;font-size:1rem;font-weight:700;cursor:pointer;width:100%}.cross:disabled{background:#6c9aa0;cursor:not-allowed}.status{margin:20px auto;background:white;border-radius:14px;padding:16px;text-align:center;max-width:740px;min-height:76px;box-shadow:0 2px 12px #1232}.status strong{display:block;font-size:1.1rem}.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.controls button{border:1px solid #9bb1b7;background:white;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:600}.stats{text-align:center;margin-top:14px;color:#52656b}.rules{max-width:760px;margin:24px auto 0;color:#40535a;font-size:.95rem}.rules summary{cursor:pointer;font-weight:700}button:focus-visible{outline:3px solid #f6a526;outline-offset:3px}@media(max-width:650px){body{padding:12px}.board{grid-template-columns:1fr 105px 1fr;gap:5px}.bank{padding:7px;min-height:310px}.item{min-width:0;width:100%;padding:10px 2px;font-size:.85rem}.river{padding:5px}.boat{padding:6px;font-size:.85rem}.cross{padding:10px 4px;font-size:.85rem}h1{font-size:1.5rem}}
+</style>
+</head>
+<body><main>
+<h1>🐺 Kecske–káposzta–farkas 🥬</h1>
+<p class="intro">Juttasd át mindhármat a túlpartra! A csónakban a révész mellett csak egy utas fér el.</p>
+<div class="board">
+<section class="bank" aria-label="Bal part"><h2>Bal part</h2><div class="items" id="left"></div></section>
+<section class="river" aria-label="Folyó"><div class="boat" id="boat"><span class="emoji">🚣</span><span id="passenger">Üres csónak</span></div><button class="cross" id="cross">Átkelés →</button></section>
+<section class="bank" aria-label="Jobb part"><h2>Jobb part</h2><div class="items" id="right"></div></section>
+</div>
+<div class="status" role="status" aria-live="polite"><strong id="message">Válassz egy utast a bal parton!</strong><span id="detail">A révész egyedül is átkelhet.</span></div>
+<div class="controls"><button id="reset">↻ Új játék</button><button id="undo">↶ Visszavonás</button><button id="hint">💡 Tipp</button></div>
+<p class="stats">Átkelések: <b id="moves">0</b> · Optimális megoldás: 7 átkelés</p>
+<details class="rules"><summary>Játékszabályok</summary><p>Ha a révész nincs ott, a farkas megeszi a kecskét, a kecske pedig a káposztát. Kattints egy szereplőre a révész partján, majd az Átkelés gombra. A kiválasztott utasra újra kattintva leveheted a csónakról. A révész utas nélkül is átkelhet.</p></details>
+</main>
+<script>
+'use strict';
+const names={wolf:'🐺 Farkas',goat:'🐐 Kecske',cabbage:'🥬 Káposzta'};
+const keys=Object.keys(names);
+let positions,farmer,passenger,moves,history,finished;
+const $=id=>document.getElementById(id);
+function snapshot(){return {positions:{...positions},farmer,passenger,moves,finished}}
+function reset(){positions={wolf:0,goat:0,cabbage:0};farmer=0;passenger=null;moves=0;history=[];finished=false;render('Válassz egy utast a bal parton!','A révész egyedül is átkelhet.')}
+function safe(p,f){for(const side of [0,1])if(f!==side&&((p.wolf===side&&p.goat===side)||(p.goat===side&&p.cabbage===side)))return false;return true}
+function render(message,detail=''){
+ for(const side of [0,1]){const root=$(side?'right':'left');root.replaceChildren();for(const key of keys){if(positions[key]!==side||passenger===key)continue;const b=document.createElement('button');b.className='item';b.textContent=names[key];b.disabled=finished||farmer!==side;b.addEventListener('click',()=>select(key));root.appendChild(b)}}
+ $('passenger').textContent=passenger?names[passenger]:'Üres csónak';
+ $('boat').querySelector('.emoji').textContent=farmer?'🚣 →':'← 🚣';
+ $('cross').textContent=farmer?'← Átkelés':'Átkelés →';$('cross').disabled=finished;
+ $('moves').textContent=moves;$('undo').disabled=!history.length;
+ $('message').textContent=message;$('detail').textContent=detail;
+}
+function select(key){if(finished||positions[key]!==farmer)return;passenger=passenger===key?null:key;render(passenger?`${names[key]} beszállt a csónakba.`:'Az utas kiszállt.','Most kattints az Átkelés gombra.')}
+$('boat').addEventListener('click',()=>{if(passenger!==null){const key=passenger;passenger=null;render(`${names[key]} kiszállt a csónakból.`,'Válassz másik utast, vagy kelj át egyedül.')}});
+function cross(){if(finished)return;const next={...positions};if(passenger)next[passenger]=1-farmer;const newFarmer=1-farmer;
+ if(!safe(next,newFarmer)){render('⚠️ Ez az átkelés veszélyes lenne!','A farkas nem maradhat egyedül a kecskével, és a kecske sem a káposztával. Válassz másik utast.');return}
+ history.push(snapshot());positions=next;farmer=newFarmer;passenger=null;moves++;
+ if(keys.every(k=>positions[k]===1)){finished=true;render('🎉 Sikerült! Mindenki átjutott!',moves===7?'Tökéletes! A minimális 7 átkelésből megoldottad.':`Összesen ${moves} átkelésből sikerült. Próbáld meg 7-ből is!`)}
+ else render('Sikeres átkelés!',`A révész most a ${farmer?'jobb':'bal'} parton van. Válassz utast, vagy kelj át egyedül.`)
+}
+$('cross').addEventListener('click',cross);
+$('reset').addEventListener('click',reset);
+$('undo').addEventListener('click',()=>{if(!history.length)return;const s=history.pop();positions=s.positions;farmer=s.farmer;passenger=s.passenger;moves=s.moves;finished=s.finished;render('Visszavontad az utolsó átkelést.','Folytasd a játékot!')});
+function stateKey(p,f){return `${keys.map(k=>p[k]).join('')}${f}`}
+function hint(){if(finished)return;const start={p:{...positions},f:farmer,path:[]},queue=[start],seen=new Set([stateKey(start.p,start.f)]);while(queue.length){const s=queue.shift();if(keys.every(k=>s.p[k]===1)){const first=s.path[0];if(first===undefined){render('Már megoldottad!');return}render('💡 Tipp',first===null?'A révész keljen át egyedül.':`A következő átkeléshez vidd magaddal: ${names[first]}.`);return}for(const who of [null,...keys.filter(k=>s.p[k]===s.f)]){const p={...s.p};if(who)p[who]=1-s.f;const f=1-s.f;if(!safe(p,f))continue;const k=stateKey(p,f);if(seen.has(k))continue;seen.add(k);queue.push({p,f,path:[...s.path,who]})}}}
+$('hint').addEventListener('click',hint);
+reset();
+</script></body></html>
