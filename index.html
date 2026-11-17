@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farkas, kecske és káposzta – Logikai játék</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0f4f8;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      margin-bottom: 8px;
+      color: #0f172a;
+      text-align: center;
+    }
+    .rules {
+      max-width: 720px;
+      background: #ffffff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 18px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .stats {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .game-board {
+      display: flex;
+      width: 100%;
+      max-width: 820px;
+      height: 360px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border: 3px solid #cbd5e1;
+    }
+    .bank {
+      width: 28%;
+      background: #86efac;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      border-right: 4px solid #65a30d;
+    }
+    .bank.right {
+      border-right: none;
+      border-left: 4px solid #65a30d;
+    }
+    .bank-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #14532d;
+      background: rgba(255,255,255,0.7);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .river {
+      width: 44%;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 16px;
+    }
+    .boat {
+      width: 150px;
+      background: #92400e;
+      border: 3px solid #78350f;
+      border-radius: 12px 12px 36px 36px;
+      padding: 12px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.5s ease-in-out;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+    }
+    .boat.left {
+      align-self: flex-start;
+    }
+    .boat.right {
+      align-self: flex-end;
+    }
+    .boat-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fde68a;
+    }
+    .items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+    }
+    .item-btn {
+      width: 125px;
+      padding: 10px 12px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      background: #ffffff;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+      transition: transform 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .item-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      background: #fef9c3;
+    }
+    .item-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 14px;
+    }
+    .action-btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .row-btn {
+      background: #2563eb;
+      color: white;
+    }
+    .row-btn:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+    .row-btn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+    .reset-btn {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .reset-btn:hover {
+      background: #cbd5e1;
+    }
+    .message {
+      margin-top: 18px;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      max-width: 720px;
+      display: none;
+    }
+    .message.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #f87171;
+    }
+    .message.win {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+      border: 2px solid #4ade80;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🛶 Farkas, kecske és káposzta</h1>
+
+  <div class="rules">
+    <strong>Feladat:</strong> Juttasd át a gazdával a farkast, a kecskét és a káposztát a bal partról a jobb partra!<br>
+    <strong>Szabályok:</strong> A csónakban a gazda mellett egyszerre legfeljebb <strong>1 utas</strong> fér el. Ha a gazda nincs ott, a <strong>farkas megeszi a kecskét</strong>, a <strong>kecske pedig megeszi a káposztát</strong>.
+  </div>
+
+  <div class="stats">
+    <span>Átkelések száma: <span id="moves">0</span></span>
+  </div>
+
+  <div class="game-board">
+    <div class="bank left">
+      <div class="bank-title">Bal part (Start)</div>
+      <div class="items-list" id="left-bank"></div>
+      <div style="height: 10px;"></div>
+    </div>
+
+    <div class="river">
+      <div class="boat left" id="boat">
+        <div class="boat-label">🧑‍🌾 Gazda csónakja</div>
+        <div id="boat-slot"></div>
+      </div>
+    </div>
+
+    <div class="bank right">
+      <div class="bank-title">Jobb part (Cél)</div>
+      <div class="items-list" id="right-bank"></div>
+      <div style="height: 10px;"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="action-btn row-btn" id="row-btn" onclick="crossRiver()">Átevezés a túlpartra 🚣</button>
+    <button class="action-btn reset-btn" onclick="resetGame()">Újrakezdés 🔄</button>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <script>
+    const ITEMS = {
+      wolf: { id: 'wolf', name: 'Farkas', emoji: '🐺' },
+      goat: { id: 'goat', name: 'Kecske', emoji: '🐐' },
+      cabbage: { id: 'cabbage', name: 'Káposzta', emoji: '🥬' }
+    };
+
+    let state = {
+      boatSide: 'left',
+      boatPassenger: null,
+      locations: {
+        wolf: 'left',
+        goat: 'left',
+        cabbage: 'left'
+      },
+      moves: 0,
+      gameOver: false
+    };
+
+    function render() {
+      const leftBank = document.getElementById('left-bank');
+      const rightBank = document.getElementById('right-bank');
+      const boat = document.getElementById('boat');
+      const boatSlot = document.getElementById('boat-slot');
+      const movesEl = document.getElementById('moves');
+      const rowBtn = document.getElementById('row-btn');
+
+      leftBank.innerHTML = '';
+      rightBank.innerHTML = '';
+      boatSlot.innerHTML = '';
+      movesEl.textContent = state.moves;
+
+      boat.className = 'boat ' + state.boatSide;
+      rowBtn.disabled = state.gameOver;
+
+      Object.keys(ITEMS).forEach(key => {
+        const item = ITEMS[key];
+        const loc = state.locations[key];
+
+        if (loc === 'boat') {
+          const btn = createItemButton(item, true);
+          boatSlot.appendChild(btn);
+        } else {
+          const btn = createItemButton(item, false);
+          if (loc === 'left') leftBank.appendChild(btn);
+          if (loc === 'right') rightBank.appendChild(btn);
+        }
+      });
+
+      if (!state.boatPassenger) {
+        const empty = document.createElement('div');
+        empty.style.fontSize = '13px';
+        empty.style.color = '#fef3c7';
+        empty.textContent = '(Üres hely)';
+        boatSlot.appendChild(empty);
+      }
+    }
+
+    function createItemButton(item, inBoat) {
+      const btn = document.createElement('button');
+      btn.className = 'item-btn';
+      btn.innerHTML = `${item.emoji} ${item.name}`;
+
+      if (state.gameOver) {
+        btn.disabled = true;
+      } else if (!inBoat && state.locations[item.id] !== state.boatSide) {
+        btn.disabled = true;
+      }
+
+      btn.onclick = () => togglePassenger(item.id);
+      return btn;
+    }
+
+    function togglePassenger(id) {
+      if (state.gameOver) return;
+
+      if (state.boatPassenger === id) {
+        state.locations[id] = state.boatSide;
+        state.boatPassenger = null;
+      } else if (state.locations[id] === state.boatSide) {
+        if (state.boatPassenger !== null) {
+          state.locations[state.boatPassenger] = state.boatSide;
+        }
+        state.locations[id] = 'boat';
+        state.boatPassenger = id;
+      }
+      render();
+    }
+
+    function crossRiver() {
+      if (state.gameOver) return;
+
+      const leftBehindSide = state.boatSide;
+      state.boatSide = state.boatSide === 'left' ? 'right' : 'left';
+      state.moves++;
+
+      checkState(leftBehindSide);
+      render();
+    }
+
+    function checkState(unattendedSide) {
+      const msgEl = document.getElementById('message');
+
+      const wolfHere = state.locations.wolf === unattendedSide;
+      const goatHere = state.locations.goat === unattendedSide;
+      const cabbageHere = state.locations.cabbage === unattendedSide;
+
+      if (wolfHere && goatHere) {
+        state.gameOver = true;
+        msgEl.className = 'message error';
+        msgEl.textContent = '❌ Vége a játéknak! Amíg áteveztél, a farkas megette a kecskét.';
+        return;
+      }
+
+      if (goatHere && cabbageHere) {
+        state.gameOver = true;
+        msgEl.className = 'message error';
+        msgEl.textContent = '❌ Vége a játéknak! Amíg áteveztél, a kecske megette a káposztát.';
+        return;
+      }
+
+      const allRight =
+        state.boatSide === 'right' &&
+        (state.locations.wolf === 'right' || state.locations.wolf === 'boat') &&
+        (state.locations.goat === 'right' || state.locations.goat === 'boat') &&
+        (state.locations.cabbage === 'right' || state.locations.cabbage === 'boat');
+
+      if (allRight) {
+        state.gameOver = true;
+        msgEl.className = 'message win';
+        const optimalText = state.moves === 7
+          ? ' Gratulálok, a lehető legkevesebb (7) lépésből oldottad meg!'
