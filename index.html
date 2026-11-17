@@ -1,370 +1,55 @@
 <!DOCTYPE html>
 <html lang="hu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Farkas, kecske és káposzta – Logikai játék</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-      margin: 0;
-      padding: 20px;
-      background: #f0f4f8;
-      color: #1e293b;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    h1 {
-      margin-bottom: 8px;
-      color: #0f172a;
-      text-align: center;
-    }
-    .rules {
-      max-width: 720px;
-      background: #ffffff;
-      padding: 14px 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-      margin-bottom: 18px;
-      font-size: 15px;
-      line-height: 1.5;
-    }
-    .stats {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      margin-bottom: 16px;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    .game-board {
-      display: flex;
-      width: 100%;
-      max-width: 820px;
-      height: 360px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-      border: 3px solid #cbd5e1;
-    }
-    .bank {
-      width: 28%;
-      background: #86efac;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      border-right: 4px solid #65a30d;
-    }
-    .bank.right {
-      border-right: none;
-      border-left: 4px solid #65a30d;
-    }
-    .bank-title {
-      font-weight: 700;
-      font-size: 16px;
-      color: #14532d;
-      background: rgba(255,255,255,0.7);
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
-    .river {
-      width: 44%;
-      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 16px;
-    }
-    .boat {
-      width: 150px;
-      background: #92400e;
-      border: 3px solid #78350f;
-      border-radius: 12px 12px 36px 36px;
-      padding: 12px;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      transition: transform 0.5s ease-in-out;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-    }
-    .boat.left {
-      align-self: flex-start;
-    }
-    .boat.right {
-      align-self: flex-end;
-    }
-    .boat-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: #fde68a;
-    }
-    .items-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 100%;
-      align-items: center;
-    }
-    .item-btn {
-      width: 125px;
-      padding: 10px 12px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
-      background: #ffffff;
-      color: #0f172a;
-      cursor: pointer;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.12);
-      transition: transform 0.15s, background 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-    .item-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      background: #fef9c3;
-    }
-    .item-btn:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-    .controls {
-      margin-top: 20px;
-      display: flex;
-      gap: 14px;
-    }
-    .action-btn {
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 700;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .row-btn {
-      background: #2563eb;
-      color: white;
-    }
-    .row-btn:hover:not(:disabled) {
-      background: #1d4ed8;
-    }
-    .row-btn:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-    .reset-btn {
-      background: #e2e8f0;
-      color: #334155;
-    }
-    .reset-btn:hover {
-      background: #cbd5e1;
-    }
-    .message {
-      margin-top: 18px;
-      padding: 14px 22px;
-      border-radius: 10px;
-      font-size: 17px;
-      font-weight: 600;
-      text-align: center;
-      max-width: 720px;
-      display: none;
-    }
-    .message.error {
-      display: block;
-      background: #fee2e2;
-      color: #991b1b;
-      border: 2px solid #f87171;
-    }
-    .message.win {
-      display: block;
-      background: #dcfce7;
-      color: #166534;
-      border: 2px solid #4ade80;
-    }
-  </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kecske–káposzta–farkas</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#163047;background:#f0f6f5}*{box-sizing:border-box}body{margin:0;padding:24px}main{max-width:980px;margin:auto}h1{text-align:center;margin:0 0 8px}p{text-align:center}.intro{color:#48616b;margin-bottom:22px}.board{display:grid;grid-template-columns:1fr 170px 1fr;gap:12px;align-items:stretch}.bank{background:#d8edcc;border:3px solid #7fa66b;border-radius:18px;min-height:320px;padding:15px;display:flex;flex-direction:column;gap:12px}.bank h2{text-align:center;font-size:1.1rem;margin:0}.items{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-content:center;flex:1}.item{border:2px solid #a7b7bd;background:white;border-radius:14px;padding:12px 9px;font-size:1rem;cursor:pointer;min-width:90px;box-shadow:0 3px 0 #c7d2d6;transition:.15s}.item:hover:not(:disabled){transform:translateY(-2px)}.item.selected{border-color:#087e82;background:#d8faf6;box-shadow:0 0 0 3px #7fdad4}.item:disabled{opacity:.55;cursor:not-allowed}.river{background:linear-gradient(125deg,#b7e9fa,#62b6d8);border-radius:18px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:12px;gap:12px}.boat{background:#fff8e8;border:3px solid #b17a37;border-radius:18px;padding:12px;text-align:center;width:100%;font-size:1.1rem}.boat .emoji{font-size:2.3rem;display:block}.cross{border:0;border-radius:12px;background:#075b68;color:white;padding:14px 12px;font-size:1rem;font-weight:700;cursor:pointer;width:100%}.cross:disabled{background:#6c9aa0;cursor:not-allowed}.status{margin:20px auto;background:white;border-radius:14px;padding:16px;text-align:center;max-width:740px;min-height:76px;box-shadow:0 2px 12px #1232}.status strong{display:block;font-size:1.1rem}.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}.controls button{border:1px solid #9bb1b7;background:white;border-radius:10px;padding:10px 16px;cursor:pointer;font-weight:600}.stats{text-align:center;margin-top:14px;color:#52656b}.rules{max-width:760px;margin:24px auto 0;color:#40535a;font-size:.95rem}.rules summary{cursor:pointer;font-weight:700}button:focus-visible{outline:3px solid #f6a526;outline-offset:3px}@media(max-width:650px){body{padding:12px}.board{grid-template-columns:1fr 105px 1fr;gap:5px}.bank{padding:7px;min-height:310px}.item{min-width:0;width:100%;padding:10px 2px;font-size:.85rem}.river{padding:5px}.boat{padding:6px;font-size:.85rem}.cross{padding:10px 4px;font-size:.85rem}h1{font-size:1.5rem}}
+</style>
 </head>
-<body>
-
-  <h1>🛶 Farkas, kecske és káposzta</h1>
-
-  <div class="rules">
-    <strong>Feladat:</strong> Juttasd át a gazdával a farkast, a kecskét és a káposztát a bal partról a jobb partra!<br>
-    <strong>Szabályok:</strong> A csónakban a gazda mellett egyszerre legfeljebb <strong>1 utas</strong> fér el. Ha a gazda nincs ott, a <strong>farkas megeszi a kecskét</strong>, a <strong>kecske pedig megeszi a káposztát</strong>.
-  </div>
-
-  <div class="stats">
-    <span>Átkelések száma: <span id="moves">0</span></span>
-  </div>
-
-  <div class="game-board">
-    <div class="bank left">
-      <div class="bank-title">Bal part (Start)</div>
-      <div class="items-list" id="left-bank"></div>
-      <div style="height: 10px;"></div>
-    </div>
-
-    <div class="river">
-      <div class="boat left" id="boat">
-        <div class="boat-label">🧑‍🌾 Gazda csónakja</div>
-        <div id="boat-slot"></div>
-      </div>
-    </div>
-
-    <div class="bank right">
-      <div class="bank-title">Jobb part (Cél)</div>
-      <div class="items-list" id="right-bank"></div>
-      <div style="height: 10px;"></div>
-    </div>
-  </div>
-
-  <div class="controls">
-    <button class="action-btn row-btn" id="row-btn" onclick="crossRiver()">Átevezés a túlpartra 🚣</button>
-    <button class="action-btn reset-btn" onclick="resetGame()">Újrakezdés 🔄</button>
-  </div>
-
-  <div class="message" id="message"></div>
-
-  <script>
-    const ITEMS = {
-      wolf: { id: 'wolf', name: 'Farkas', emoji: '🐺' },
-      goat: { id: 'goat', name: 'Kecske', emoji: '🐐' },
-      cabbage: { id: 'cabbage', name: 'Káposzta', emoji: '🥬' }
-    };
-
-    let state = {
-      boatSide: 'left',
-      boatPassenger: null,
-      locations: {
-        wolf: 'left',
-        goat: 'left',
-        cabbage: 'left'
-      },
-      moves: 0,
-      gameOver: false
-    };
-
-    function render() {
-      const leftBank = document.getElementById('left-bank');
-      const rightBank = document.getElementById('right-bank');
-      const boat = document.getElementById('boat');
-      const boatSlot = document.getElementById('boat-slot');
-      const movesEl = document.getElementById('moves');
-      const rowBtn = document.getElementById('row-btn');
-
-      leftBank.innerHTML = '';
-      rightBank.innerHTML = '';
-      boatSlot.innerHTML = '';
-      movesEl.textContent = state.moves;
-
-      boat.className = 'boat ' + state.boatSide;
-      rowBtn.disabled = state.gameOver;
-
-      Object.keys(ITEMS).forEach(key => {
-        const item = ITEMS[key];
-        const loc = state.locations[key];
-
-        if (loc === 'boat') {
-          const btn = createItemButton(item, true);
-          boatSlot.appendChild(btn);
-        } else {
-          const btn = createItemButton(item, false);
-          if (loc === 'left') leftBank.appendChild(btn);
-          if (loc === 'right') rightBank.appendChild(btn);
-        }
-      });
-
-      if (!state.boatPassenger) {
-        const empty = document.createElement('div');
-        empty.style.fontSize = '13px';
-        empty.style.color = '#fef3c7';
-        empty.textContent = '(Üres hely)';
-        boatSlot.appendChild(empty);
-      }
-    }
-
-    function createItemButton(item, inBoat) {
-      const btn = document.createElement('button');
-      btn.className = 'item-btn';
-      btn.innerHTML = `${item.emoji} ${item.name}`;
-
-      if (state.gameOver) {
-        btn.disabled = true;
-      } else if (!inBoat && state.locations[item.id] !== state.boatSide) {
-        btn.disabled = true;
-      }
-
-      btn.onclick = () => togglePassenger(item.id);
-      return btn;
-    }
-
-    function togglePassenger(id) {
-      if (state.gameOver) return;
-
-      if (state.boatPassenger === id) {
-        state.locations[id] = state.boatSide;
-        state.boatPassenger = null;
-      } else if (state.locations[id] === state.boatSide) {
-        if (state.boatPassenger !== null) {
-          state.locations[state.boatPassenger] = state.boatSide;
-        }
-        state.locations[id] = 'boat';
-        state.boatPassenger = id;
-      }
-      render();
-    }
-
-    function crossRiver() {
-      if (state.gameOver) return;
-
-      const leftBehindSide = state.boatSide;
-      state.boatSide = state.boatSide === 'left' ? 'right' : 'left';
-      state.moves++;
-
-      checkState(leftBehindSide);
-      render();
-    }
-
-    function checkState(unattendedSide) {
-      const msgEl = document.getElementById('message');
-
-      const wolfHere = state.locations.wolf === unattendedSide;
-      const goatHere = state.locations.goat === unattendedSide;
-      const cabbageHere = state.locations.cabbage === unattendedSide;
-
-      if (wolfHere && goatHere) {
-        state.gameOver = true;
-        msgEl.className = 'message error';
-        msgEl.textContent = '❌ Vége a játéknak! Amíg áteveztél, a farkas megette a kecskét.';
-        return;
-      }
-
-      if (goatHere && cabbageHere) {
-        state.gameOver = true;
-        msgEl.className = 'message error';
-        msgEl.textContent = '❌ Vége a játéknak! Amíg áteveztél, a kecske megette a káposztát.';
-        return;
-      }
-
-      const allRight =
-        state.boatSide === 'right' &&
-        (state.locations.wolf === 'right' || state.locations.wolf === 'boat') &&
-        (state.locations.goat === 'right' || state.locations.goat === 'boat') &&
-        (state.locations.cabbage === 'right' || state.locations.cabbage === 'boat');
-
-      if (allRight) {
-        state.gameOver = true;
-        msgEl.className = 'message win';
-        const optimalText = state.moves === 7
-          ? ' Gratulálok, a lehető legkevesebb (7) lépésből oldottad meg!'
+<body><main>
+<h1>🐺 Kecske–káposzta–farkas 🥬</h1>
+<p class="intro">Juttasd át mindhármat a túlpartra! A csónakban a révész mellett csak egy utas fér el.</p>
+<div class="board">
+<section class="bank" aria-label="Bal part"><h2>Bal part</h2><div class="items" id="left"></div></section>
+<section class="river" aria-label="Folyó"><div class="boat" id="boat"><span class="emoji">🚣</span><span id="passenger">Üres csónak</span></div><button class="cross" id="cross">Átkelés →</button></section>
+<section class="bank" aria-label="Jobb part"><h2>Jobb part</h2><div class="items" id="right"></div></section>
+</div>
+<div class="status" role="status" aria-live="polite"><strong id="message">Válassz egy utast a bal parton!</strong><span id="detail">A révész egyedül is átkelhet.</span></div>
+<div class="controls"><button id="reset">↻ Új játék</button><button id="undo">↶ Visszavonás</button><button id="hint">💡 Tipp</button></div>
+<p class="stats">Átkelések: <b id="moves">0</b> · Optimális megoldás: 7 átkelés</p>
+<details class="rules"><summary>Játékszabályok</summary><p>Ha a révész nincs ott, a farkas megeszi a kecskét, a kecske pedig a káposztát. Kattints egy szereplőre a révész partján, majd az Átkelés gombra. A kiválasztott utasra újra kattintva leveheted a csónakról. A révész utas nélkül is átkelhet.</p></details>
+</main>
+<script>
+'use strict';
+const names={wolf:'🐺 Farkas',goat:'🐐 Kecske',cabbage:'🥬 Káposzta'};
+const keys=Object.keys(names);
+let positions,farmer,passenger,moves,history,finished;
+const $=id=>document.getElementById(id);
+function snapshot(){return {positions:{...positions},farmer,passenger,moves,finished}}
+function reset(){positions={wolf:0,goat:0,cabbage:0};farmer=0;passenger=null;moves=0;history=[];finished=false;render('Válassz egy utast a bal parton!','A révész egyedül is átkelhet.')}
+function safe(p,f){for(const side of [0,1])if(f!==side&&((p.wolf===side&&p.goat===side)||(p.goat===side&&p.cabbage===side)))return false;return true}
+function render(message,detail=''){
+ for(const side of [0,1]){const root=$(side?'right':'left');root.replaceChildren();for(const key of keys){if(positions[key]!==side||passenger===key)continue;const b=document.createElement('button');b.className='item';b.textContent=names[key];b.disabled=finished||farmer!==side;b.addEventListener('click',()=>select(key));root.appendChild(b)}}
+ $('passenger').textContent=passenger?names[passenger]:'Üres csónak';
+ $('boat').querySelector('.emoji').textContent=farmer?'🚣 →':'← 🚣';
+ $('cross').textContent=farmer?'← Átkelés':'Átkelés →';$('cross').disabled=finished;
+ $('moves').textContent=moves;$('undo').disabled=!history.length;
+ $('message').textContent=message;$('detail').textContent=detail;
+}
+function select(key){if(finished||positions[key]!==farmer)return;passenger=passenger===key?null:key;render(passenger?`${names[key]} beszállt a csónakba.`:'Az utas kiszállt.','Most kattints az Átkelés gombra.')}
+$('boat').addEventListener('click',()=>{if(passenger!==null){const key=passenger;passenger=null;render(`${names[key]} kiszállt a csónakból.`,'Válassz másik utast, vagy kelj át egyedül.')}});
+function cross(){if(finished)return;const next={...positions};if(passenger)next[passenger]=1-farmer;const newFarmer=1-farmer;
+ if(!safe(next,newFarmer)){render('⚠️ Ez az átkelés veszélyes lenne!','A farkas nem maradhat egyedül a kecskével, és a kecske sem a káposztával. Válassz másik utast.');return}
+ history.push(snapshot());positions=next;farmer=newFarmer;passenger=null;moves++;
+ if(keys.every(k=>positions[k]===1)){finished=true;render('🎉 Sikerült! Mindenki átjutott!',moves===7?'Tökéletes! A minimális 7 átkelésből megoldottad.':`Összesen ${moves} átkelésből sikerült. Próbáld meg 7-ből is!`)}
+ else render('Sikeres átkelés!',`A révész most a ${farmer?'jobb':'bal'} parton van. Válassz utast, vagy kelj át egyedül.`)
+}
+$('cross').addEventListener('click',cross);
+$('reset').addEventListener('click',reset);
+$('undo').addEventListener('click',()=>{if(!history.length)return;const s=history.pop();positions=s.positions;farmer=s.farmer;passenger=s.passenger;moves=s.moves;finished=s.finished;render('Visszavontad az utolsó átkelést.','Folytasd a játékot!')});
+function stateKey(p,f){return `${keys.map(k=>p[k]).join('')}${f}`}
+function hint(){if(finished)return;const start={p:{...positions},f:farmer,path:[]},queue=[start],seen=new Set([stateKey(start.p,start.f)]);while(queue.length){const s=queue.shift();if(keys.every(k=>s.p[k]===1)){const first=s.path[0];if(first===undefined){render('Már megoldottad!');return}render('💡 Tipp',first===null?'A révész keljen át egyedül.':`A következő átkeléshez vidd magaddal: ${names[first]}.`);return}for(const who of [null,...keys.filter(k=>s.p[k]===s.f)]){const p={...s.p};if(who)p[who]=1-s.f;const f=1-s.f;if(!safe(p,f))continue;const k=stateKey(p,f);if(seen.has(k))continue;seen.add(k);queue.push({p,f,path:[...s.path,who]})}}}
+$('hint').addEventListener('click',hint);
+reset();
+</script></body></html>
